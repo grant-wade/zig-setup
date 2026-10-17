@@ -16,7 +16,7 @@ Inputs match `mlugg/setup-zig@v2`, so it can be swapped in directly. Unlike setu
 2. Restores the Zig archive from the Actions cache, or downloads it from a random [community mirror](https://ziglang.org/download/community-mirrors.txt), falling back to ziglang.org if every mirror fails.
 3. Verifies the archive's minisign signature and signed file name, both after downloading and after restoring from cache.
 4. Adds Zig to `PATH`, points `ZIG_GLOBAL_CACHE_DIR` and `ZIG_LOCAL_CACHE_DIR` at `.zig-cache` in the workspace, and restores it from the Actions cache.
-5. After the job, saves `.zig-cache` without `tmp/`, unless nothing changed since the restore. A cache over `cache-size-limit` is cleared before saving.
+5. After the job, saves `.zig-cache` without the contents of `tmp/`, unless nothing changed since the restore. A cache over `cache-size-limit` is cleared before saving.
 
 Cache entries are keyed by job, Zig version, OS, architecture and `cache-key`. Restores use the newest matching entry.
 

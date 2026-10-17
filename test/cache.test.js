@@ -61,7 +61,7 @@ test('cache service round trip', async (t) => {
     await cache.unpackDirectory(archive, restored);
     assert.equal(fs.readFileSync(path.join(restored, 'run'), 'utf8'), '2');
     assert.equal(fs.readFileSync(path.join(restored, 'o', 'abc', 'artifact'), 'utf8'), 'built');
-    assert.equal(fs.existsSync(path.join(restored, 'tmp')), false);
+    assert.deepEqual(fs.readdirSync(path.join(restored, 'tmp')), []);
     assert.equal((await cache.directoryStats(restored)).size, 6);
   });
 

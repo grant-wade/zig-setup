@@ -187,6 +187,8 @@ export async function unpackDirectory(archive, dir) {
     waitForExit(child),
     pipeline(fs.createReadStream(archive), zlib.createZstdDecompress(), child.stdin),
   ]);
+  // Zig 0.17 assumes tmp/ exists in an existing cache and fails configuration with FileNotFound otherwise.
+  for (const name of IGNORED_ENTRIES) await fs.promises.mkdir(path.join(dir, name), { recursive: true });
 }
 
 // Fingerprints only paths and sizes: Zig rewrites manifests whenever source mtimes differ, as they do after every checkout.
