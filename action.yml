@@ -1,0 +1,39 @@
+name: 'Zig Setup'
+description: 'Install a verified Zig compiler and cache the Zig cache directories between runs'
+author: 'Grant Wade'
+branding:
+  icon: 'zap'
+  color: 'orange'
+inputs:
+  version:
+    description: 'Zig version, e.g. "0.16.0" or "0.17.0-dev.351+64ef45eb0". "master" is the latest nightly, "latest" is the newest tagged release. When empty, uses mach_zig_version or minimum_zig_version from build.zig.zon, falling back to "latest".'
+    default: ''
+  mirror:
+    description: 'Download only from this mirror instead of the community mirror list, e.g. "https://pkg.machengine.org/zig".'
+    default: ''
+  use-cache:
+    description: 'Restore and save the Zig global and local cache directories.'
+    default: 'true'
+  save-cache:
+    description: 'When to save to the Actions cache. "auto" saves only from the default branch, whose entries every other branch can restore. "true" always saves and "false" never does.'
+    default: 'auto'
+  cache-key:
+    description: 'Extra cache key component. With a matrix, include the matrix variables that are not already implied by the OS and Zig version.'
+    default: ''
+  cache-size-limit:
+    description: 'Maximum Zig cache size in MiB. A larger cache is cleared before saving. 0 means no limit.'
+    default: '2048'
+  use-tool-cache:
+    description: 'Extract Zig into the runner tool cache so later jobs on the same machine can reuse it. Defaults to true on self-hosted runners and false on GitHub-hosted ones.'
+    default: ''
+outputs:
+  zig-version:
+    description: 'The output of `zig version` for the installed compiler.'
+  zig-path:
+    description: 'The directory containing the zig executable.'
+  cache-hit:
+    description: 'Whether a Zig cache entry was restored.'
+runs:
+  using: 'node24'
+  main: 'src/main.js'
+  post: 'src/post.js'

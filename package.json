@@ -1,0 +1,14 @@
+{
+  "name": "zig-setup",
+  "version": "1.0.0",
+  "description": "Dependency-free GitHub Action that installs Zig",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

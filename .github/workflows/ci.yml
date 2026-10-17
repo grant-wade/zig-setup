@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: Unit tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24
+      - run: node --test
+
+  action:
+    name: Action (${{ matrix.os }}, ${{ matrix.version }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ["0.16.0", latest, master]
+        os:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+          - macos-15-intel
+          - macos-15
+          - windows-2025
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - id: zig
+        uses: ./
+        with:
+          version: ${{ matrix.version }}
+          cache-key: ${{ matrix.version }}
+      - name: Check the installed compiler
+        env:
+          REQUESTED: ${{ matrix.version }}
+          INSTALLED: ${{ steps.zig.outputs.zig-version }}
+          CACHE_HIT: ${{ steps.zig.outputs.cache-hit }}
+        run: |
+          test "$(zig version)" = "$INSTALLED"
+          case "$REQUESTED" in latest|master) ;; *) test "$INSTALLED" = "$REQUESTED" ;; esac
+          test -n "$ZIG_GLOBAL_CACHE_DIR"
+          echo "Zig $INSTALLED, cache hit: $CACHE_HIT" >> "$GITHUB_STEP_SUMMARY"
+      - name: Compile and test
+        working-directory: ${{ runner.temp }}
+        run: |
+          printf 'const std = @import("std");\ntest { try std.testing.expect(1 + 1 == 2); }\n' > smoke.zig
+          zig test smoke.zig
